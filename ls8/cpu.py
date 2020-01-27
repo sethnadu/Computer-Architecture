@@ -37,7 +37,7 @@ class CPU:
         return self.ram[MAR]
 
     def ram_write(self, MAR, MDR):
-        # self.ram[MAR] = MDR
+        self.ram[MAR] = MDR
         self.reg[MAR] = MDR
 
 
@@ -74,21 +74,24 @@ class CPU:
         """Run the CPU."""
         
         running = True
-        operand_a = self.ram_read(self.pc + 1)
-        operand_b = self.ram_read(self.pc + 2)
-        LDI = 130 #10000010
-        PRN = 71 #1000111
-        HTL = 1 #1
-        # self.trace()
-        
+        # LOAD immediate
+        LDI = 0b10000010 #10000010
+        # Print
+        PRN = 0b01000111 #1000111
+        # Halt
+        HTL = 0b00000001 #1
+
         while running:
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
             ir = self.ram[self.pc]
             if ir == LDI:
-                self.ram_write(operand_a, operand_b)
+                # self.ram_write(operand_a, operand_b)
+                self.reg[operand_a] = operand_b
                 self.pc += 3
             elif ir == PRN:
                 print("REG", self.reg[operand_a])
-                print("RAM", self.ram[operand_a])
+                print("RAM", self.ram_read(operand_a))
                 self.pc += 2
             elif ir == HTL:
                 running = False
