@@ -37,7 +37,7 @@ class CPU:
         return self.ram[MAR]
 
     def ram_write(self, MAR, MDR):
-        self.ram[MAR] = MDR
+        # self.ram[MAR] = MDR
         self.reg[MAR] = MDR
 
 
@@ -87,7 +87,8 @@ class CPU:
                 self.ram_write(operand_a, operand_b)
                 self.pc += 3
             elif ir == PRN:
-                print(self.ram_read(operand_a))
+                print("REG", self.reg[operand_a])
+                print("RAM", self.ram[operand_a])
                 self.pc += 2
             elif ir == HTL:
                 running = False
