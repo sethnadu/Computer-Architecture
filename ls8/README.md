@@ -60,6 +60,12 @@ but you'll have to implement those three above instructions first!
 ## Step 0: IMPORTANT: inventory what is here!
 
 * Make a list of files here.
+
+examples folder- holds examples of commands in binary
+cpu - main class to execute code
+ls8 - file to run code, using CPU class
+ls8-specs - binary of each command
+
 * Write a short 3-10-word description of what each file does.
 * Note what has been implemented, and what hasn't.
 * Read this whole file.
