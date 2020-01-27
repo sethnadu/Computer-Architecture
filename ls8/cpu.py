@@ -16,7 +16,7 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
-        program = [
+        program = [ 
             # From print8.ls8
             0b10000010, # LDI R0,8
             0b00000000,
