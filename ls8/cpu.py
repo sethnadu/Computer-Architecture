@@ -2,6 +2,12 @@
 
 import sys
 
+# sys.argv[1] = 'examples/mult.ls8'
+
+
+print( sys.argv[1])
+
+
 class CPU:
     """Main CPU class."""
 
@@ -9,25 +15,50 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.reg = [0] * 8
+
         self.pc = 0
 
     def load(self):
         """Load a program into memory."""
 
         address = 0
-
+        binary_strings = []
+        program = []
         # For now, we've just hardcoded a program:
+        l = open(sys.argv[1], 'r')
+        for line in l:
+            if line.startswith('#'):
+                None
+            elif line == '\n':
+                None
+            elif line.startswith('\n'):
+                None
+            else:
+                binary_strings.append(line)
 
-        program = [ 
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
+        print(binary_strings)
+        
+        # program = [ 
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
+        for i in binary_strings:
+            if "#" in i:
+                for j in range(len(i)):
+                    if i[j] is '#':
+                        print("outcome", i[0:j])
+                        x = int(i[0:j], 2)
+                        program.append(x)
+            else:
+                x = int(i, 2)
+                program.append(x)
+            
+        print('program', program)
         for instruction in program:
             self.ram[address] = instruction
             address += 1
@@ -83,14 +114,13 @@ class CPU:
         while running:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-            ir = self.ram[self.pc]
+            ir = self.ram_read(self.pc)
             if ir == LDI:
                 # self.ram_write(operand_a, operand_b)
                 self.reg[operand_a] = operand_b
                 self.pc += 3
             elif ir == PRN:
                 print("REG", self.reg[operand_a])
-                print("RAM", self.ram_read(operand_a))
                 self.pc += 2
             elif ir == HTL:
                 running = False
