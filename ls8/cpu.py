@@ -2,12 +2,6 @@
 
 import sys
 
-# sys.argv[1] = 'examples/mult.ls8'
-
-
-print( sys.argv[1])
-
-
 class CPU:
     """Main CPU class."""
 
@@ -21,47 +15,48 @@ class CPU:
     def load(self):
         """Load a program into memory."""
 
+        # Check for what arguement of files be ran
+        if len(sys.argv) != 2:
+            print("Usage: file.py filename", file=sys.stderr)
+            sys.exit(1)
+        else:
+            fileName = sys.argv[1]
+
         address = 0
         binary_strings = []
         program = []
-        # For now, we've just hardcoded a program:
-        l = open(sys.argv[1], 'r')
-        for line in l:
-            if line.startswith('#'):
-                None
-            elif line == '\n':
-                None
-            elif line.startswith('\n'):
-                None
-            else:
-                binary_strings.append(line)
 
-        print(binary_strings)
-        
-        # program = [ 
-        #     # From print8.ls8
-        #     0b10000010, # LDI R0,8
-        #     0b00000000,
-        #     0b00001000,
-        #     0b01000111, # PRN R0
-        #     0b00000000,
-        #     0b00000001, # HLT
-        # ]
-        for i in binary_strings:
-            if "#" in i:
-                for j in range(len(i)):
-                    if i[j] is '#':
-                        print("outcome", i[0:j])
-                        x = int(i[0:j], 2)
-                        program.append(x)
-            else:
-                x = int(i, 2)
-                program.append(x)
+        #  If second arguement is valid
+        try:
+            # Open the file that contains the programs
+            l = open(fileName, 'r')
+            for line in l:
+                if line.startswith('#'):
+                    None
+                elif line == '\n':
+                    None
+                elif line.startswith('\n'):
+                    None
+                else:
+                    binary_strings.append(line)
+
+            print("Array of Binary_strings", binary_strings)
             
-        print('program', program)
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+            for i in binary_strings:
+                comment_split = i.split('#')
+                new_value = comment_split[0]
+                x = int(new_value, 2)
+                program.append(x)
+                
+            print('program', program)
+            for instruction in program:
+                self.ram[address] = instruction
+                address += 1
+
+        # If second arguement is invalid
+        except FileNotFoundError:
+            print(f'{sys.argv[0]} : {sys.argv[1]} Not found')
+            sys.exit(2)
 
     def ram_read(self, MAR):
         # print(self.ram[MAR])
@@ -76,6 +71,8 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -105,24 +102,33 @@ class CPU:
         
         running = True
         # LOAD immediate
-        LDI = 0b10000010 #10000010
+        LDI = 0b10000010 
         # Print
-        PRN = 0b01000111 #1000111
+        PRN = 0b01000111 
+        # Multiply
+        MUL = 0b10100010
         # Halt
-        HTL = 0b00000001 #1
+        HTL = 0b00000001 
+    
 
         while running:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
             ir = self.ram_read(self.pc)
             if ir == LDI:
-                # self.ram_write(operand_a, operand_b)
                 self.reg[operand_a] = operand_b
+                # Skip current pc and its two arguements
                 self.pc += 3
             elif ir == PRN:
                 print("REG", self.reg[operand_a])
+                # Skip current pc and it's single arguement
                 self.pc += 2
+            elif ir == MUL:
+                self.alu("MUL", operand_a, operand_b)
+                # Skip current pc and it's two arguements
+                self.pc += 3
             elif ir == HTL:
+                # Stops the program
                 running = False
 
         

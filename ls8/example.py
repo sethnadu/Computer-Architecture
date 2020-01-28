@@ -8,26 +8,35 @@ SAVE = 4 #Saves value to register
 PRINT_REGISTER = 5
 ADD = 6
 
-memory = [
-    PRINT_BEEJ,
-    SAVE, # Saves value 65 to register 2
-    65,
-    2,
-    SAVE, # Saves value 20 to register 3
-    20,
-    3,
-    ADD, # Add values r2 and r3, store it in r2
-    2, 
-    3,
-    PRINT_REGISTER, #PRINt the value in r2
-    2,
-    HALT
-]
+memory = [0] * 256
+
 
 register = [0] * 8
 
 pc = 0
 running = True
+
+
+def load_memory(filename):
+    if len(sys.argv) != 2:
+    print("Usage: file.py filename", file=sys.stderr)
+    sys.exit(1)
+
+    try:
+        with open(sys.argv[1]) as f:
+            commands = []
+            for line in f:
+                # Ignore comments
+                comment_split = line.split('#')
+                val = comment_split[0]
+                x = (val, 2)
+                print(f'{x:08b}:{x:d}')
+                commands.append(x)
+            # print(commands)
+            
+    except FileNotFoundError:
+        print(f'{sys.argv[0]} : {sys.argv[1]} Not found')
+        sys.exit(2)
 
 while running:
     # execute instruction sin memory
