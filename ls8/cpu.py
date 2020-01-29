@@ -2,6 +2,17 @@
 
 import sys
 
+running = True
+# LOAD immediate
+LDI = 0b10000010 
+# Print
+PRN = 0b01000111 
+# Multiply
+MUL = 0b10100010
+# Halt
+HTL = 0b00000001 
+    
+
 class CPU:
     """Main CPU class."""
 
@@ -9,8 +20,11 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.reg = [0] * 8
-
         self.pc = 0
+        self.branchtable = {}
+        self.branchtable[LDI] = self.handle_ldi
+        self.branchtable[PRN] = self.handle_prn
+        self.branchtable[MUL] = self.handle_mul
 
     def load(self):
         """Load a program into memory."""
@@ -50,7 +64,8 @@ class CPU:
                 
             print('program', program)
             for instruction in program:
-                self.ram[address] = instruction
+                # self.ram[address] = instruction
+                self.ram_write(address, instruction)
                 address += 1
 
         # If second arguement is invalid
@@ -65,14 +80,30 @@ class CPU:
     def ram_write(self, MAR, MDR):
         self.ram[MAR] = MDR
 
+    def handle_ldi(self, reg_a, reg_b):
+        self.reg[reg_a] = reg_b
+        # Skip current pc and its two arguements
+        self.pc += 3
+
+    def handle_prn(self, reg_a, reg_b):
+        print("REG", self.reg[reg_a])
+        # Skip current pc and it's single arguement
+        self.pc += 2
+
+    def handle_mul(self, reg_a, reg_b):
+        self.alu("MUL", reg_a, reg_b)
+        # Skip current pc and it's two arguements
+        self.pc += 3
+    
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         elif op == "MUL":
+            
             self.reg[reg_a] *= self.reg[reg_b]
+            print(self.reg[reg_a])
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -96,39 +127,17 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
-
+    
     def run(self):
         """Run the CPU."""
         
         running = True
-        # LOAD immediate
-        LDI = 0b10000010 
-        # Print
-        PRN = 0b01000111 
-        # Multiply
-        MUL = 0b10100010
-        # Halt
-        HTL = 0b00000001 
-    
-
         while running:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
             ir = self.ram_read(self.pc)
-            if ir == LDI:
-                self.reg[operand_a] = operand_b
-                # Skip current pc and its two arguements
-                self.pc += 3
-            elif ir == PRN:
-                print("REG", self.reg[operand_a])
-                # Skip current pc and it's single arguement
-                self.pc += 2
-            elif ir == MUL:
-                self.alu("MUL", operand_a, operand_b)
-                # Skip current pc and it's two arguements
-                self.pc += 3
-            elif ir == HTL:
-                # Stops the program
-                running = False
 
-        
+            if ir in self.branchtable:
+                self.branchtable[ir](operand_a, operand_b)
+            elif ir is HTL:
+                running = False
