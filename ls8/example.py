@@ -7,13 +7,18 @@ PRINT_NUM = 3
 SAVE = 4 #Saves value to register
 PRINT_REGISTER = 5
 ADD = 6
+PUSH = 7
+POP = 8
+CALL = 9
+RET = 10
+
 
 memory = [0] * 256
-
-
 register = [0] * 8
-
 pc = 0
+# Register at index 7 (8)
+sp = 7
+
 running = True
 
 
@@ -71,6 +76,40 @@ while running:
         reg = memory[pc + 1]
         print(register[reg])
         pc +=2
+
+    elif command == PUSH:
+        reg = memory[pc + 1]
+        value = register[reg]
+        register[SP] -= 1
+        memory[register[SP]] = val
+        pc +=2
+    
+    elif command == POP:
+        reg = memory[pc + 1]
+        value = memory[register[sp]]
+        register[reg] = value
+        pc +=2
+    
+    elif command = CALL:
+        # The address of the instruction directly after CALL is pushed onto the stack
+        value = pc + 2
+        register[SP] -= 1
+        memory[register[SP]] = val
+        # The PC is set to the address stored in the given register
+        reg = memory[pc + 1]
+        subroutine_address = register[reg]
+        # We jump to that location in Ram and execute the first instruction
+        # The PC can move forward or backwards from it's current location
+        pc = subroutine_address
+
+    elif command = RET:
+        # Return from the subroutine
+        # Pop the value form the top of the stack and sotre it in the PC.
+        return_address = register[SP]
+        pc = memory[registers[SP]]
+        # Increment the SP by 1
+        registers[SP] += 1
+
 
     else: 
         print(f"Error: Unknown command: {command}")
